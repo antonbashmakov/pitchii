@@ -9,15 +9,34 @@ import {
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import HomeButtom from '../components/HomeButton';
+import HomeButton from '../components/HomeButton';
 import Discover from '../pages/Discover';
 import Home from '../pages/Home';
 import Inbox from '../pages/Inbox';
 import Me from '../pages/Me';
 import Record from '../pages/Record';
+import SignupPhone from '../pages/SignupPhone';
+import SignupPhoneVerification from '../pages/SignupPhoneVerification';
 
 const Tab = createMaterialBottomTabNavigator();
 const Stack = createStackNavigator();
+
+const AuthRoutes: React.FC = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="SignupPhone"
+        component={SignupPhone}
+        options={{ title: 'Sign up' }}
+      />
+      <Stack.Screen
+        name="SignupPhoneVerification"
+        component={SignupPhoneVerification}
+        options={{ title: '' }}
+      />
+    </Stack.Navigator>
+  );
+};
 
 const AppRoutes: React.FC = () => {
   const [home, setHome] = useState(true);
@@ -83,7 +102,7 @@ const AppRoutes: React.FC = () => {
         })}
         options={{
           tabBarLabel: '',
-          tabBarIcon: () => <HomeButtom home={home} />,
+          tabBarIcon: () => <HomeButton home={home} />,
         }}
       />
       <Tab.Screen
@@ -126,6 +145,11 @@ const RootStackScreen: React.FC = () => {
         options={{ headerShown: false }}
         name="Record"
         component={Record}
+      />
+      <Stack.Screen
+        options={{ headerShown: false }}
+        name="Auth"
+        component={AuthRoutes}
       />
     </Stack.Navigator>
   );

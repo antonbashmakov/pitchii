@@ -23,7 +23,14 @@ import {
   Bookmark,
 } from './styles';
 
-const Me: React.FC = () => {
+const Me: React.FC = (props: Record<string, any>) => {
+  const { navigation } = props;
+
+  const onLogoutClick = (): void => {
+    console.log('onLogoutClick');
+    navigation.navigate('Auth');
+  };
+
   return (
     <Container>
       <Header>
@@ -64,12 +71,12 @@ const Me: React.FC = () => {
           </Stats>
           <ProfileColumn>
             <ProfileEdit>
-              <ProfileText>Edit profile</ProfileText>
+              <ProfileText onPress={() => onLogoutClick()}>Edit profile</ProfileText>
             </ProfileEdit>
             <Bookmark name="bookmark" size={24} color="black" />
           </ProfileColumn>
 
-          <StatsText>Tap to add bio</StatsText>
+          <StatsText onClick={() => onLogoutClick()}>Tap to add bio</StatsText>
         </Content>
       </ScrollView>
     </Container>
