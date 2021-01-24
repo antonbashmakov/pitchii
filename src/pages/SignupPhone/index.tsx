@@ -1,6 +1,10 @@
 import React, { useRef, useState } from 'react';
 import PhoneInput from 'react-native-phone-number-input';
 
+import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
+
+import firebaseService from '../../service/firebaseService';
+
 import {
   ViewContainer,
   InputContainer,
@@ -9,19 +13,36 @@ import {
 } from './styles';
 
 const SignupPhone: React.FC = ({ navigation }) => {
-  const [value, setValue] = useState();
+  const recaptchaVerifier = useRef();
+  const [value, setValue] = useState('333101425');
   const [formattedValue, setFormattedValue] = useState();
   const phoneInput = useRef<PhoneInput>(null);
 
-  const sendCode = (): void => {
-    // todo do send code
-    console.log('value', value);
-    console.log('formattedValue', formattedValue);
-    navigation.navigate('SignupPhoneVerification', { phone: formattedValue });
+  const sendCode = async (): Promise<void> => {
+    try {
+      console.log('formattedValue', formattedValue);
+      const phoneProvider = new firebaseService.auth.PhoneAuthProvider();
+      const verificationId = await phoneProvider.verifyPhoneNumber(
+        formattedValue,
+        recaptchaVerifier.current,
+      );
+      // setVerificationId(verificationId);
+      navigation.navigate('SignupPhoneVerification', {
+        phone: formattedValue,
+        verificationId,
+      });
+    } catch (e) {
+      console.log('signInWithPhoneNumber', e);
+    }
   };
 
   return (
     <ViewContainer>
+      <FirebaseRecaptchaVerifierModal
+        ref={recaptchaVerifier}
+        firebaseConfig={firebaseService.config()}
+        attemptInvisibleVerification
+      />
       <InputContainer>
         <PhoneInput
           ref={phoneInput}

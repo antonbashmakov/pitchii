@@ -1,4 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+
+import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
+
+import firebaseService from '../../service/firebaseService';
 
 import {
   ViewContainer,
@@ -13,8 +17,10 @@ import {
 
 const TIMER_LENGTH = 60;
 
-const SignupPhoneVerification: React.FC = ({ route }) => {
+const SignupPhoneVerification: React.FC = ({ route, navigation }) => {
   const { phone } = route.params;
+  let { verificationId } = route.params;
+  const recaptchaVerifier = useRef();
   const [isTimerEnd, setTimerEnd] = useState(false);
   const [seconds, setSeconds] = useState(TIMER_LENGTH);
   const [value1, setValue1] = useState('');
@@ -27,6 +33,7 @@ const SignupPhoneVerification: React.FC = ({ route }) => {
   const startTimer = (): NodeJS.Timeout => {
     setTimerEnd(false);
     let s = TIMER_LENGTH;
+    // eslint-disable-next-line no-plusplus
     const id = setInterval(() => setSeconds(s--), 1000);
     setTimeout(() => {
       clearInterval(id);
@@ -35,15 +42,40 @@ const SignupPhoneVerification: React.FC = ({ route }) => {
     return id;
   };
 
-  const resendCode = (): void => {
-    // TODO resend
+  const resetCode = (): void => {
     setValue1('');
     setValue2('');
     setValue3('');
     setValue4('');
     setValue5('');
     setValue6('');
+  };
+
+  const resendCode = async (): void => {
+    const phoneProvider = new firebaseService.auth.PhoneAuthProvider();
+    verificationId = await phoneProvider.verifyPhoneNumber(
+      phone,
+      recaptchaVerifier.current,
+    );
+    resetCode();
     startTimer();
+  };
+
+  const verifyCode = (code): void => {
+    console.log('verification', verificationId, code, value1);
+    const credential = firebaseService.auth.PhoneAuthProvider.credential(
+      verificationId,
+      code,
+    );
+    firebaseService
+      .auth()
+      .signInWithCredential(credential)
+      .then(() => navigation.navigate('Main'))
+      .catch(e => {
+        console.log('verifyCodeFailed', e);
+        resetCode();
+        setTimerEnd(true);
+      });
   };
 
   useEffect(() => {
@@ -51,8 +83,19 @@ const SignupPhoneVerification: React.FC = ({ route }) => {
     return () => clearInterval(id);
   }, []);
 
+  const setLastNumber = (value): void => {
+    setValue6(value);
+    const code = `${value1}${value2}${value3}${value4}${value5}${value}`;
+    verifyCode(code);
+  };
+
   return (
     <ViewContainer>
+      <FirebaseRecaptchaVerifierModal
+        ref={recaptchaVerifier}
+        firebaseConfig={firebaseService.config()}
+        attemptInvisibleVerification
+      />
       <Label>Enter 6-digit code</Label>
       <ShortDescription>
         Your code was send to
@@ -64,7 +107,7 @@ const SignupPhoneVerification: React.FC = ({ route }) => {
           keyboardType="number-pad"
           textContentType="oneTimeCode"
           textAlign="center"
-          onChange={value => setValue1(value)}
+          onChangeText={value => setValue1(value)}
           maxLength={1}
         />
         <InputNumber
@@ -72,7 +115,7 @@ const SignupPhoneVerification: React.FC = ({ route }) => {
           textAlign="center"
           keyboardType="number-pad"
           textContentType="oneTimeCode"
-          onChange={value => setValue2(value)}
+          onChangeText={value => setValue2(value)}
           maxLength={1}
         />
         <InputNumber
@@ -80,7 +123,7 @@ const SignupPhoneVerification: React.FC = ({ route }) => {
           textAlign="center"
           keyboardType="number-pad"
           textContentType="oneTimeCode"
-          onChange={value => setValue3(value)}
+          onChangeText={value => setValue3(value)}
           maxLength={1}
         />
         <InputNumber
@@ -88,7 +131,7 @@ const SignupPhoneVerification: React.FC = ({ route }) => {
           textAlign="center"
           keyboardType="number-pad"
           textContentType="oneTimeCode"
-          onChange={value => setValue4(value)}
+          onChangeText={value => setValue4(value)}
           maxLength={1}
         />
         <InputNumber
@@ -96,7 +139,7 @@ const SignupPhoneVerification: React.FC = ({ route }) => {
           textAlign="center"
           keyboardType="number-pad"
           textContentType="oneTimeCode"
-          onChange={value => setValue5(value)}
+          onChangeText={value => setValue5(value)}
           maxLength={1}
         />
         <InputNumber
@@ -104,12 +147,12 @@ const SignupPhoneVerification: React.FC = ({ route }) => {
           textAlign="center"
           keyboardType="number-pad"
           textContentType="oneTimeCode"
-          onChange={value => setValue6(value)}
+          onChangeText={value => setLastNumber(value)}
           maxLength={1}
         />
       </InputCodeContainer>
       {!isTimerEnd ? (
-        <TimerText>Resend code in {seconds} seconds</TimerText>
+        <TimerText>{`Resend code in ${seconds} seconds`}</TimerText>
       ) : (
         <ResendCode onPress={() => resendCode()}>
           <ResentCodeText>Resend code</ResentCodeText>

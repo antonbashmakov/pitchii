@@ -31,7 +31,7 @@ export const InputNumber = styled.TextInput`
   border-bottom-color: grey;
 `;
 
-export const TimerText = styled.TextInput`
+export const TimerText = styled.Text`
   font-size: 16px;
 `;
 

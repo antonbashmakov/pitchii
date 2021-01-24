@@ -137,6 +137,11 @@ const RootStackScreen: React.FC = () => {
   return (
     <Stack.Navigator mode="modal">
       <Stack.Screen
+        options={{ headerShown: false }}
+        name="Auth"
+        component={AuthRoutes}
+      />
+      <Stack.Screen
         name="Main"
         component={AppRoutes}
         options={{ headerShown: false }}
@@ -145,11 +150,6 @@ const RootStackScreen: React.FC = () => {
         options={{ headerShown: false }}
         name="Record"
         component={Record}
-      />
-      <Stack.Screen
-        options={{ headerShown: false }}
-        name="Auth"
-        component={AuthRoutes}
       />
     </Stack.Navigator>
   );
