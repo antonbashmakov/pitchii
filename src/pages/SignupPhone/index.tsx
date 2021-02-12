@@ -27,6 +27,7 @@ const SignupPhone: React.FC = ({ navigation }) => {
         recaptchaVerifier.current,
       );
       // setVerificationId(verificationId);
+      console.log('verificationId', verificationId);
       navigation.navigate('SignupPhoneVerification', {
         phone: formattedValue,
         verificationId,

@@ -19,7 +19,6 @@ const TIMER_LENGTH = 60;
 
 const SignupPhoneVerification: React.FC = ({ route, navigation }) => {
   const { phone } = route.params;
-  let { verificationId } = route.params;
   const recaptchaVerifier = useRef();
   const [isTimerEnd, setTimerEnd] = useState(false);
   const [seconds, setSeconds] = useState(TIMER_LENGTH);
@@ -29,6 +28,7 @@ const SignupPhoneVerification: React.FC = ({ route, navigation }) => {
   const [value4, setValue4] = useState('');
   const [value5, setValue5] = useState('');
   const [value6, setValue6] = useState('');
+  const [verificationId, setVerificationId] = useState(null);
 
   const startTimer = (): NodeJS.Timeout => {
     setTimerEnd(false);
@@ -53,10 +53,11 @@ const SignupPhoneVerification: React.FC = ({ route, navigation }) => {
 
   const resendCode = async (): void => {
     const phoneProvider = new firebaseService.auth.PhoneAuthProvider();
-    verificationId = await phoneProvider.verifyPhoneNumber(
+    const id = await phoneProvider.verifyPhoneNumber(
       phone,
       recaptchaVerifier.current,
     );
+    setVerificationId(id);
     resetCode();
     startTimer();
   };
@@ -82,6 +83,11 @@ const SignupPhoneVerification: React.FC = ({ route, navigation }) => {
     const id = startTimer();
     return () => clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    if (!route.params || !route.params.verificationId) return;
+    setVerificationId(route.params.verificationId);
+  }, [ route.params ])
 
   const setLastNumber = (value): void => {
     setValue6(value);
