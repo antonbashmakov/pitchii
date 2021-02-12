@@ -14,7 +14,7 @@ import {
 
 const SignupPhone: React.FC = ({ navigation }) => {
   const recaptchaVerifier = useRef();
-  const [value, setValue] = useState('333101425');
+  const [value, setValue] = useState('555555555');
   const [formattedValue, setFormattedValue] = useState();
   const phoneInput = useRef<PhoneInput>(null);
 

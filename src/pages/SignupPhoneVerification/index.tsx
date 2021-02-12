@@ -22,12 +22,14 @@ const SignupPhoneVerification: React.FC = ({ route, navigation }) => {
   const recaptchaVerifier = useRef();
   const [isTimerEnd, setTimerEnd] = useState(false);
   const [seconds, setSeconds] = useState(TIMER_LENGTH);
-  const [value1, setValue1] = useState('');
-  const [value2, setValue2] = useState('');
-  const [value3, setValue3] = useState('');
-  const [value4, setValue4] = useState('');
-  const [value5, setValue5] = useState('');
-  const [value6, setValue6] = useState('');
+  const [values, setValue] = useState(['', '', '', '', '', '']);
+  const [refs, setRef] = useState([null, null, null, null, null, null]);
+  const refValue1 = useRef();
+  const refValue2 = useRef();
+  const refValue3 = useRef();
+  const refValue4 = useRef();
+  const refValue5 = useRef();
+  const refValue6 = useRef();
   const [verificationId, setVerificationId] = useState(null);
 
   const startTimer = (): NodeJS.Timeout => {
@@ -43,12 +45,7 @@ const SignupPhoneVerification: React.FC = ({ route, navigation }) => {
   };
 
   const resetCode = (): void => {
-    setValue1('');
-    setValue2('');
-    setValue3('');
-    setValue4('');
-    setValue5('');
-    setValue6('');
+    setValue(['', '', '', '', '', '']);
   };
 
   const resendCode = async (): void => {
@@ -63,7 +60,7 @@ const SignupPhoneVerification: React.FC = ({ route, navigation }) => {
   };
 
   const verifyCode = (code): void => {
-    console.log('verification', verificationId, code, value1);
+    console.log('verification', verificationId, code);
     const credential = firebaseService.auth.PhoneAuthProvider.credential(
       verificationId,
       code,
@@ -80,6 +77,7 @@ const SignupPhoneVerification: React.FC = ({ route, navigation }) => {
   };
 
   useEffect(() => {
+    setRef([refValue1, refValue2, refValue3, refValue4, refValue5, refValue6]);
     const id = startTimer();
     return () => clearInterval(id);
   }, []);
@@ -87,12 +85,23 @@ const SignupPhoneVerification: React.FC = ({ route, navigation }) => {
   useEffect(() => {
     if (!route.params || !route.params.verificationId) return;
     setVerificationId(route.params.verificationId);
-  }, [ route.params ])
+  }, [route.params]);
 
   const setLastNumber = (value): void => {
-    setValue6(value);
-    const code = `${value1}${value2}${value3}${value4}${value5}${value}`;
+    const code = `${values[0]}${values[1]}${values[2]}${values[3]}${values[4]}${value}`;
     verifyCode(code);
+  };
+
+  const setCodeValue = (number, value) => {
+    const code = [...values];
+    code[number] = value;
+    setValue(code);
+    if (+number > 4) {
+      setLastNumber(value);
+      return;
+    }
+    // console.log('refs[number + 1]', refs[number + 1].current.focus());
+    refs[number + 1] && refs[number + 1].current.focus();
   };
 
   return (
@@ -109,51 +118,57 @@ const SignupPhoneVerification: React.FC = ({ route, navigation }) => {
       </ShortDescription>
       <InputCodeContainer>
         <InputNumber
-          value={value1}
+          ref={refValue1}
+          value={values[0]}
           keyboardType="number-pad"
           textContentType="oneTimeCode"
           textAlign="center"
-          onChangeText={value => setValue1(value)}
+          onChangeText={value => setCodeValue(0, value)}
           maxLength={1}
         />
         <InputNumber
-          value={value2}
+          ref={refValue2}
+          value={values[1]}
           textAlign="center"
           keyboardType="number-pad"
           textContentType="oneTimeCode"
-          onChangeText={value => setValue2(value)}
+          onChangeText={value => setCodeValue(1, value)}
           maxLength={1}
         />
         <InputNumber
-          value={value3}
+          ref={refValue3}
+          value={values[2]}
           textAlign="center"
           keyboardType="number-pad"
           textContentType="oneTimeCode"
-          onChangeText={value => setValue3(value)}
+          onChangeText={value => setCodeValue(2, value)}
           maxLength={1}
         />
         <InputNumber
-          value={value4}
+          ref={refValue4}
+          value={values[3]}
           textAlign="center"
           keyboardType="number-pad"
           textContentType="oneTimeCode"
-          onChangeText={value => setValue4(value)}
+          onChangeText={value => setCodeValue(3, value)}
           maxLength={1}
         />
         <InputNumber
-          value={value5}
+          ref={refValue5}
+          value={values[4]}
           textAlign="center"
           keyboardType="number-pad"
           textContentType="oneTimeCode"
-          onChangeText={value => setValue5(value)}
+          onChangeText={value => setCodeValue(4, value)}
           maxLength={1}
         />
         <InputNumber
-          value={value6}
+          ref={refValue6}
+          value={values[5]}
           textAlign="center"
           keyboardType="number-pad"
           textContentType="oneTimeCode"
-          onChangeText={value => setLastNumber(value)}
+          onChangeText={value => setCodeValue(5, value)}
           maxLength={1}
         />
       </InputCodeContainer>
